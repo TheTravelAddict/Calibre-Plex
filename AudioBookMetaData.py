@@ -1,5 +1,9 @@
 # coding=utf-8
 #!/usr/local/opt/python/libexec/bin/python
+import sys
+import urllib
+from urllib.request import urlopen
+
 import fnmatch
 import os
 from bs4 import BeautifulSoup
@@ -19,11 +23,22 @@ M4B_COVER			= "covr"		#Poster						|cover.jpg				|over
 pattern = '*.m4b'
 
 
+#*******************************************************************************
+#** Good Reads API                                                            **
+#** Here is your developer key for using the Goodreads API.                   **
+#** This key must be appended to every request using the form variable 'key'. **
+#** (If you're using our write API, you'll need your secret too.)             **
+#*******************************************************************************
+GoodReads_API_key = 'You will have to get your own'
+GoodReads_Secret  = 'You will have to get your own'
+GoodReads_AuthorSearch     = 'https://www.goodreads.com/api/author_url/'
+
+
 #*********************************
 #** Path to your Calibre Library**
 #*********************************
 path = '/volumes/Bay 4 HD/Calibre Library'
-#path = '/users/mra/Calibre Library'
+path = '/users/mra/Calibre Library'
 
 
 	
@@ -101,6 +116,39 @@ def transparentSquare(pil_img, background_color):
 		return result
 
 
+def goodreadsauthor(authorName):
+
+	goodReads_authorID=''
+	goodReads_authorURL=''
+	goodReads_authorPicURL=''
+
+# authorposter = '/Users/mra/Downloads/Author-Poster.jpg'
+	print(authorName)
+	authorSearchURL=(GoodReads_AuthorSearch+urllib.parse.quote(authorName)+GoodReads_API_key)
+	try:
+		u=urlopen(authorSearchURL)
+		blurb=u.read()
+		soup0 = BeautifulSoup(blurb, 'xml')
+		try:
+			goodReads_authorID=soup0.find("author")['id']
+			goodReads_authorURL=soup0.find("link").string.split('?')[0]
+			u2=urlopen(goodReads_authorURL)
+			blurb2=u2.read()
+			soup2 = BeautifulSoup(blurb2, 'lxml')
+			try:
+				goodReads_authorPicURL = soup2.find("meta",{"property" : "og:image"})["content"]
+				urllib.request.urlretrieve(goodReads_authorPicURL, authorPoster)
+			except:
+				return 'fail'
+		except:
+			return 'fail'
+	except:
+		return authorSearchURL
+	return 'woohoo!'
+# 
+# 
+	return('Woo Hoo!')
+
 
 for calibreDir, dirnames, filenames in os.walk(path):
 	if not filenames:
@@ -111,6 +159,7 @@ for calibreDir, dirnames, filenames in os.walk(path):
 			m4bFile        =('{}/{}'.format(calibreDir, file))
 			opfFile        = calibreDir+'/metadata.opf'
 			coverImageFile = calibreDir+"/cover.jpg"
+			authorPoster   = os.path.dirname(calibreDir)+'/poster.jpg'
 			
 #			****************************
 #			** Parse the the OPF      **
@@ -157,3 +206,13 @@ for calibreDir, dirnames, filenames in os.walk(path):
 					f2 = open(opfFile,'w')
 					f2.write(contents)
 					f2.close()
+					print (calibreData.creator)
+
+#					***********************
+#					** Update the Author **
+#					***********************
+					print('updating Author')
+					if (os.path.exists(authorPoster) == True):
+						print ('Author poster exists')
+					else:
+						print (goodreadsauthor(calibreData.creator))
