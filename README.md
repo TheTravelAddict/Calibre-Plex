@@ -31,3 +31,4 @@ In order for this to work, you will need to do the following:
     * Pillow
     * Mutagen
     * Beautiful Soup
+    * a goodreads API key if you want it to also download the author's pic
