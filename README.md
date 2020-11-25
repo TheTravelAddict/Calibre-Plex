@@ -11,6 +11,8 @@ It works by reading the Calibre metadata and then altering the tags in the Mb4 f
 It does not use the Calibre API as I found that the Calibre API is blocking if Calibre is currently running; so instead it scrapes metadata from the calibre generated OPF files.
 It puts a new tag in these OPF files to indicate that it has already run against the book in question.  This is nice, as if you later alter the metadata using Calibre, Calibre will remove this tag, causing my script to update the mb4 file with the new metadata.
 
+It also pulls the Author's image off of goodreads.com - but requires you generate your own API key for this; so unless you have a goodreads account you should comment out those lines.
+
 It would probably be way better to write a Plex Agent to read the Calibre data - but I have found exactly 0 documantation on creating Plex agents.  
 
 In anycase - it works for me which is all that is important; and if anyone else finds it useful; then bonus for them.
